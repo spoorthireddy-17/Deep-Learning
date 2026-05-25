@@ -147,6 +147,10 @@ label {
 # LOAD MODEL
 # ---------------------------------------------------
 
+# ---------------------------------------------------
+# BUILD SIMPLE MODEL
+# ---------------------------------------------------
+
 model = tf.keras.Sequential([
 
     tf.keras.Input(shape=(3,)),
@@ -162,8 +166,34 @@ model = tf.keras.Sequential([
     )
 ])
 
-model.load_weights(
-    "titanic_weights.weights.h5"
+# ---------------------------------------------------
+# COMPILE MODEL
+# ---------------------------------------------------
+
+model.compile(
+    optimizer='adam',
+    loss='binary_crossentropy',
+    metrics=['accuracy']
+)
+
+# ---------------------------------------------------
+# DUMMY TRAINING
+# ---------------------------------------------------
+
+X_dummy = np.array([
+    [0.2,0.24,0.80],
+    [0.5,0.30,0.40],
+    [0.8,0.60,0.20],
+    [0.1,0.20,0.90]
+])
+
+y_dummy = np.array([1,1,0,1])
+
+model.fit(
+    X_dummy,
+    y_dummy,
+    epochs=20,
+    verbose=0
 )
 
 # ---------------------------------------------------
