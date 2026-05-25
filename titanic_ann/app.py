@@ -147,8 +147,22 @@ label {
 # LOAD MODEL
 # ---------------------------------------------------
 
-model = tf.keras.models.load_model(
-    "titanic_ann_model.keras"
+model = tf.keras.models.Sequential([
+
+    tf.keras.layers.Dense(
+        2,
+        activation='sigmoid',
+        input_shape=(3,)
+    ),
+
+    tf.keras.layers.Dense(
+        1,
+        activation='sigmoid'
+    )
+])
+
+model.load_weights(
+    "titanic_weights.weights.h5"
 )
 
 # ---------------------------------------------------
