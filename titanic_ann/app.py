@@ -148,7 +148,7 @@ label {
 # ---------------------------------------------------
 
 model = tf.keras.models.load_model(
-    "titanic_ann_model.h5"
+    "titanic_ann_model.keras"
 )
 
 # ---------------------------------------------------
