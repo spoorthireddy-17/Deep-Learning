@@ -147,12 +147,13 @@ label {
 # LOAD MODEL
 # ---------------------------------------------------
 
-model = tf.keras.models.Sequential([
+model = tf.keras.Sequential([
+
+    tf.keras.Input(shape=(3,)),
 
     tf.keras.layers.Dense(
         2,
-        activation='sigmoid',
-        input_shape=(3,)
+        activation='sigmoid'
     ),
 
     tf.keras.layers.Dense(
