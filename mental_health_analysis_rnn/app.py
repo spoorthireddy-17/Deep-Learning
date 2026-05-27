@@ -125,7 +125,7 @@ textarea {
 # LOAD MODEL FILES
 # =========================================================
 
-model = load_model("mental_health_rnn_model.keras")
+model = load_model("mental_health_rnn_model.h5")
 
 with open("tokenizer.pkl", "rb") as file:
     tokenizer = pickle.load(file)
