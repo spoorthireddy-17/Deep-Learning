@@ -4,6 +4,14 @@ import numpy as np
 import joblib
 import plotly.express as px
 
+st.set_page_config(
+    page_title="Employee Attrition Predictor",
+    page_icon="📊",
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
+
+
 st.markdown("""
 <style>
 
@@ -178,11 +186,14 @@ st.set_page_config(
 # LOAD DATA
 # =====================================
 
+from pathlib import Path
+
+BASE_DIR = Path(__file__).resolve().parent
+
 @st.cache_data
 def load_data():
-    return pd.read_csv(
-        "WA_Fn-UseC_-HR-Employee-Attrition.csv"
-    )
+    csv_path = BASE_DIR / "WA_Fn-UseC_-HR-Employee-Attrition.csv"
+    return pd.read_csv(csv_path)
 
 df = load_data()
 
@@ -191,7 +202,7 @@ df = load_data()
 # =====================================
 
 model = joblib.load(
-    "random_forest_streamlit.pkl"
+    BASE_DIR / "random_forest_streamlit.pkl"
 )
 
 # =====================================
@@ -613,8 +624,8 @@ elif page == "👥 Employee Segmentation":
     # Load cluster data
 
     cluster_data = pd.read_csv(
-        "employee_clusters.csv"
-    )
+    BASE_DIR / "employee_clusters.csv"
+)
 
     st.markdown("---")
 
