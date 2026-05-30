@@ -47,10 +47,14 @@ st.sidebar.info(
 # LOAD MODELS
 # ==========================================
 
-rf = joblib.load("random_forest_small.pkl")
-scaler = joblib.load("scaler.pkl")
-pca = joblib.load("pca.pkl")
-kmeans = joblib.load("kmeans.pkl")
+import os
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+rf = joblib.load(os.path.join(BASE_DIR, "random_forest_small.pkl"))
+pca = joblib.load(os.path.join(BASE_DIR, "pca.pkl"))
+scaler = joblib.load(os.path.join(BASE_DIR, "scaler.pkl"))
+kmeans = joblib.load(os.path.join(BASE_DIR, "kmeans.pkl"))
 
 # ==========================================
 # CUSTOM CSS
