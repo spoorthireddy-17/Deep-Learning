@@ -47,7 +47,7 @@ st.sidebar.info(
 # LOAD MODELS
 # ==========================================
 
-rf = joblib.load("random_forest.pkl")
+rf = joblib.load("random_forest_small.pkl")
 scaler = joblib.load("scaler.pkl")
 pca = joblib.load("pca.pkl")
 kmeans = joblib.load("kmeans.pkl")
