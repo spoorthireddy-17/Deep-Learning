@@ -304,6 +304,10 @@ if st.button("Analyze Report"):
         if confidence > 50:
             st.success("High Confidence")
 
+        elif confidence < 50:
+            st.info(
+                "Prediction confidence is low. Consider reviewing Top-5 specialties."
+            )
         elif confidence > 20:
             st.warning("Moderate Confidence")
 
@@ -545,3 +549,5 @@ if st.button("Analyze Report"):
                 file_name="medical_analysis_report.pdf",
                 mime="application/pdf"
             )
+            
+ 
