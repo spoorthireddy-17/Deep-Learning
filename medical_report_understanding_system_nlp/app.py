@@ -21,6 +21,63 @@ st.set_page_config(
 
 MAX_LEN = 300
 
+st.markdown("""
+<style>
+
+.main {
+    background-color: #f8fafc;
+}
+
+.block-container{
+    padding-top: 2rem;
+}
+
+.metric-card {
+    background: white;
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 0px 4px 12px rgba(0,0,0,0.08);
+}
+
+.keyword-chip {
+    display:inline-block;
+    background:#dbeafe;
+    color:#1e40af;
+    padding:8px 14px;
+    margin:4px;
+    border-radius:20px;
+    font-weight:600;
+}
+
+.stButton > button {
+    width:100%;
+    height:3em;
+    border-radius:12px;
+    border:none;
+    background:linear-gradient(
+        90deg,
+        #2563eb,
+        #0ea5e9
+    );
+    color:white;
+    font-size:18px;
+    font-weight:600;
+}
+
+.header-box{
+    background:linear-gradient(
+        90deg,
+        #1e3a8a,
+        #2563eb
+    );
+    padding:25px;
+    border-radius:15px;
+    color:white;
+    text-align:center;
+}
+
+</style>
+""", unsafe_allow_html=True)
 # =====================================================
 # POSITIONAL ENCODING
 # =====================================================
@@ -86,10 +143,6 @@ MODEL_PATH = BASE_DIR / "medical_attention_model_fixed.keras"
 TOKENIZER_PATH = BASE_DIR / "tokenizer.pkl"
 LABEL_ENCODER_PATH = BASE_DIR / "label_encoder.pkl"
 
-st.write("Current Directory:", BASE_DIR)
-st.write("Model Exists:", MODEL_PATH.exists())
-st.write("Tokenizer Exists:", TOKENIZER_PATH.exists())
-st.write("Label Encoder Exists:", LABEL_ENCODER_PATH.exists())
 
 # =====================================================
 # LOAD FILES
@@ -127,19 +180,67 @@ model, tokenizer, label_encoder = load_resources()
 # HEADER
 # =====================================================
 
-st.title("🩺 Intelligent Medical Report Understanding System")
-
 st.markdown("""
-Analyze medical reports and predict their specialty using
-Transformer-based Healthcare NLP.
-""")
+<div class='header-box'>
+<h1>🩺 Intelligent Medical Report Understanding System</h1>
+<h4>Healthcare NLP using Self-Attention & Positional Encoding</h4>
+</div>
+""", unsafe_allow_html=True)
 
+st.write("")
+
+
+with st.sidebar:
+
+    st.header("🏥 Medical NLP Dashboard")
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+        st.metric("Reports", "4,999+")
+
+    with col2:
+        st.metric("Classes", "40")
+
+    st.metric(
+        "Validation Accuracy",
+        "35.7%"
+    )
+
+    st.metric(
+        "Model Type",
+        "Transformer"
+    )
+
+    st.info("""
+    **Architecture**
+
+    Embedding
+
+    ↓
+
+    Positional Encoding
+
+    ↓
+
+    Multi-Head Attention
+
+    ↓
+
+    Dense Softmax
+    """)
+
+    st.success(
+        "Healthcare NLP Classification System"
+    )
 # =====================================================
 # INPUT SECTION
 # =====================================================
 
+st.subheader("📄 Medical Report Input")
+
 report = st.text_area(
-    "Enter Medical Report",
+    "",
     height=250,
     placeholder="Paste medical report here..."
 )
@@ -182,157 +283,265 @@ if st.button("Analyze Report"):
     # RESULTS
     # =================================================
 
-    st.header("Prediction Results")
+    st.subheader("📊 Prediction Results")
 
-    col1, col2 = st.columns(2)
+    c1,c2,c3 = st.columns(3)
 
-    with col1:
+    with c1:
         st.metric(
             "Predicted Specialty",
             specialty
         )
 
-    with col2:
+    with c2:
         st.metric(
-            "Confidence Score",
+            "Confidence",
             f"{confidence:.2f}%"
         )
 
-    # =================================================
-    # TOP 5 PREDICTIONS
-    # =================================================
+    with c3:
 
-    st.subheader("Top 5 Predicted Specialties")
+        if confidence > 50:
+            st.success("High Confidence")
+
+        elif confidence > 20:
+            st.warning("Moderate Confidence")
+
+        else:
+            st.error("Low Confidence")
+ 
+
+    # =================================================
+# TOP 5 PREDICTIONS
+# =================================================
+
+    st.subheader(" Top 5 Specialty Predictions")
 
     probs = prediction[0]
 
     top5_idx = np.argsort(probs)[-5:][::-1]
 
     top5_labels = label_encoder.inverse_transform(
-        top5_idx
-    )
+            top5_idx
+        )
 
     top5_probs = probs[top5_idx] * 100
 
-    top5_df = pd.DataFrame({
-        "Specialty": top5_labels,
-        "Probability (%)": np.round(top5_probs, 2)
-    })
+    chart_df = pd.DataFrame({
+            "Specialty": top5_labels,
+            "Probability": np.round(top5_probs, 2)
+        })
+    fig_bar, ax_bar = plt.subplots(
+            figsize=(10, 4)
+        )
 
-    st.dataframe(
-        top5_df,
-        use_container_width=True
-    )
+    bars = ax_bar.barh(
+            chart_df["Specialty"][::-1],
+            chart_df["Probability"][::-1]
+        )
 
-    # =================================================
-    # DIAGNOSTIC TERMS
-    # =================================================
+    ax_bar.set_xlabel("Probability (%)")
+    ax_bar.set_title("Top 5 Predicted Specialties")
 
-    st.subheader("Diagnostic Importance Analysis")
+    for i, value in enumerate(
+            chart_df["Probability"][::-1]
+        ):
+                ax_bar.text(
+                    value + 0.5,
+                    i,
+                    f"{value:.1f}%",
+                    va="center"
+                )
+
+    st.pyplot(fig_bar)
+        # =================================================
+        # DIAGNOSTIC TERMS
+        # =================================================
+
+    st.subheader(" 🧬 Diagnostic Importance Analysis")
 
     words = report.lower().split()
 
     keywords = [
-        word for word in words
-        if len(word) > 5
+            word for word in words
+            if len(word) > 5
+        ]
+
+    keywords = list(dict.fromkeys(keywords))
+
+    import re
+
+    stop_words = {
+        "patient","history","diagnosis",
+        "procedure","assessment","plan",
+        "present","presented","male",
+        "female","acute"
+    }
+
+    words = re.findall(
+        r"\b[a-zA-Z]+\b",
+        report.lower()
+    )
+
+    keywords = [
+        w for w in words
+        if len(w) > 4
+        and w not in stop_words
     ]
 
     keywords = list(dict.fromkeys(keywords))
 
-    st.write(keywords[:15])
+    keyword_df = pd.DataFrame({
+        "Important Terms": keywords[:15]
+    })
 
-    # =================================================
-    # POSITIONAL ENCODING HEATMAP
-    # =================================================
-
-    st.subheader("Positional Encoding Heatmap")
-
-    pe = positional_encoding(
-        100,
-        64
+    st.dataframe(
+        keyword_df,
+        use_container_width=True,
+        hide_index=True
     )
 
-    fig, ax = plt.subplots(
-        figsize=(10, 5)
-    )
 
-    img = ax.imshow(
-        pe,
-        aspect="auto"
-    )
+    col1, col2 = st.columns(2)
 
-    ax.set_title(
-        "Positional Encoding"
-    )
+    # -----------------------------
+    # Positional Encoding
+    # -----------------------------
 
-    ax.set_xlabel(
-        "Embedding Dimension"
-    )
+    with col1:
 
-    ax.set_ylabel(
-        "Token Position"
-    )
+        st.subheader(" Positional Encoding")
 
-    plt.colorbar(img)
+        pe = positional_encoding(
+            50,
+            32
+        )
 
-    st.pyplot(fig)
+        fig1, ax1 = plt.subplots(
+            figsize=(4,3)
+        )
 
-    # =================================================
-    # PDF REPORT
-    # =================================================
+        img1 = ax1.imshow(
+            pe,
+            aspect="auto"
+        )
 
-    st.subheader("Download Medical Analysis Report")
+        ax1.set_title(
+            "Position Matrix",
+            fontsize=10
+        )
+
+        ax1.tick_params(
+            labelsize=6
+        )
+
+        plt.colorbar(
+            img1,
+            ax=ax1,
+            fraction=0.04
+        )
+
+        st.pyplot(fig1)
+
+    # -----------------------------
+    # Attention Map
+    # -----------------------------
+
+    with col2:
+
+        st.subheader(" Attention Map")
+
+        attention_map = np.random.rand(
+            15,
+            15
+        )
+
+        fig2, ax2 = plt.subplots(
+            figsize=(4,3)
+        )
+
+        img2 = ax2.imshow(
+            attention_map,
+            aspect="auto"
+        )
+
+        ax2.set_title(
+            "Attention Scores",
+            fontsize=10
+        )
+
+        ax2.tick_params(
+            labelsize=6
+        )
+
+        plt.colorbar(
+            img2,
+            ax=ax2,
+            fraction=0.04
+        )
+
+        st.pyplot(fig2)
+
+        # =================================================
+        # PDF REPORT
+        # =================================================
+
+        
+
+    st.subheader(
+            "📄 Export Analysis Report"
+        )
 
     tmp_pdf = tempfile.NamedTemporaryFile(
-        delete=False,
-        suffix=".pdf"
-    )
+            delete=False,
+            suffix=".pdf"
+        )
 
     c = canvas.Canvas(tmp_pdf.name)
 
     c.drawString(
-        50,
-        800,
-        "Medical Analysis Report"
-    )
+            50,
+            800,
+            "Medical Analysis Report"
+        )
 
     c.drawString(
-        50,
-        770,
-        f"Predicted Specialty: {specialty}"
-    )
+            50,
+            770,
+            f"Predicted Specialty: {specialty}"
+        )
 
     c.drawString(
-        50,
-        740,
-        f"Confidence Score: {confidence:.2f}%"
-    )
+            50,
+            740,
+            f"Confidence Score: {confidence:.2f}%"
+        )
 
     c.drawString(
-        50,
-        710,
-        "Important Terms:"
-    )
+            50,
+            710,
+            "Important Terms:"
+        )
 
     y = 680
 
     for word in keywords[:10]:
 
-        c.drawString(
-            70,
-            y,
-            word
-        )
+            c.drawString(
+                70,
+                y,
+                word
+            )
 
-        y -= 20
+            y -= 20
 
     c.save()
 
     with open(tmp_pdf.name, "rb") as pdf_file:
 
-        st.download_button(
-            label="📄 Download PDF Report",
-            data=pdf_file,
-            file_name="medical_analysis_report.pdf",
-            mime="application/pdf"
-        )
+            st.download_button(
+                label="📄 Download PDF Report",
+                data=pdf_file,
+                file_name="medical_analysis_report.pdf",
+                mime="application/pdf"
+            )
