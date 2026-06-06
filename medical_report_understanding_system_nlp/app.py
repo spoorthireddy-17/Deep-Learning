@@ -77,28 +77,52 @@ class PositionalEncoding(Layer):
 # =====================================================
 # LOAD FILES
 # =====================================================
+import os
+from pathlib import Path
+
+BASE_DIR = Path(__file__).resolve().parent
+
+MODEL_PATH = BASE_DIR / "medical_attention_model_fixed.keras"
+TOKENIZER_PATH = BASE_DIR / "tokenizer.pkl"
+LABEL_ENCODER_PATH = BASE_DIR / "label_encoder.pkl"
+
+st.write("Current Directory:", BASE_DIR)
+st.write("Model Exists:", MODEL_PATH.exists())
+st.write("Tokenizer Exists:", TOKENIZER_PATH.exists())
+st.write("Label Encoder Exists:", LABEL_ENCODER_PATH.exists())
+
+# =====================================================
+# LOAD FILES
+# =====================================================
 
 @st.cache_resource
 def load_resources():
 
-    model = tf.keras.models.load_model(
-        "medical_attention_model_fixed.keras",
-        custom_objects={
-            "PositionalEncoding": PositionalEncoding
-        },
-        compile=False
-    )
+    try:
 
-    with open("tokenizer.pkl", "rb") as f:
-        tokenizer = pickle.load(f)
+        model = tf.keras.models.load_model(
+            MODEL_PATH,
+            custom_objects={
+                "PositionalEncoding": PositionalEncoding
+            },
+            compile=False,
+            safe_mode=False
+        )
 
-    with open("label_encoder.pkl", "rb") as f:
-        label_encoder = pickle.load(f)
+        with open(TOKENIZER_PATH, "rb") as f:
+            tokenizer = pickle.load(f)
 
-    return model, tokenizer, label_encoder
+        with open(LABEL_ENCODER_PATH, "rb") as f:
+            label_encoder = pickle.load(f)
+
+        return model, tokenizer, label_encoder
+
+    except Exception as e:
+        st.exception(e)
+        raise e
+
 
 model, tokenizer, label_encoder = load_resources()
-
 # =====================================================
 # HEADER
 # =====================================================
